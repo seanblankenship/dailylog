@@ -26,3 +26,15 @@ go.work.sum
 
 # system stuff
 .DS_Store
+
+# Binaries
+dailylog
+dailylog.exe
+
+# IDE directories
+.idea/
+.vscode/
+
+# Log files and backups
+logs/
+backups/
