@@ -140,6 +140,10 @@ func loadFiles(config *Config) tea.Msg {
 			})
 		}
 	}
+	for i := 0; i < len(items)/2; i++ {
+		j := len(items) - 1 - i
+		items[i], items[j] = items[j], items[i]
+	}
 
 	return items
 }
@@ -152,8 +156,6 @@ func setViewportContent(m *model, content string) {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
-	// If we're in add mode, handle all input through the text input
-	// except for very specific escape cases
 	if m.mode == addMode {
 		switch msg := msg.(type) {
 		case tea.KeyMsg:
@@ -175,12 +177,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 		}
-		// Everything else goes to text input
 		m.textInput, cmd = m.textInput.Update(msg)
 		return m, cmd
 	}
 
-	// Handle all other modes
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
@@ -238,7 +238,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.mode = normalMode
 				return m, nil
 			}
-			// Let the viewport handle its own movement
 			m.viewport, cmd = m.viewport.Update(msg)
 			return m, cmd
 		}
@@ -279,19 +278,16 @@ func (m model) saveNote(content string) error {
 	filename := now.Format("01-02-2006") + ".md"
 	filePath := filepath.Join(m.config.BaseDir, m.config.MarkdownDir, filename)
 
-	// Create directories if they don't exist
 	if err := os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
 		return &ErrFileAccess{Op: "create directory", Path: filepath.Dir(filePath), Err: err}
 	}
 
-	// Use file locking for concurrent access
 	f, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return &ErrFileAccess{Op: "open", Path: filePath, Err: err}
 	}
 	defer f.Close()
 
-	// Add file locking
 	if err := lockFile(f); err != nil {
 		return fmt.Errorf("failed to lock file: %w", err)
 	}
@@ -306,8 +302,6 @@ func (m model) saveNote(content string) error {
 }
 
 func lockFile(f *os.File) error {
-	// Implementation depends on OS
-	// For Unix-like systems:
 	if err := syscall.Flock(int(f.Fd()), syscall.LOCK_EX); err != nil {
 		return fmt.Errorf("failed to lock file: %w", err)
 	}

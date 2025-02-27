@@ -70,3 +70,9 @@ I was having difficulty remembering things I had completed from day to day, so I
 
 -   logs are stored in `~/.dailylog/logs/` as markdown files
 -   backups are stored in `~/.dailylog/backups/` as ZIP files
+
+## Changelog
+
+### 2/27/25
+
+-   reversed the order of entries when starting the app so that most recent shows at the top
